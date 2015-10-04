@@ -1,1 +1,0 @@
-var Catdown=require("catdown"),editor=new Catdown({textarea:document.getElementById("pad"),preview:document.getElementById("markdown")});

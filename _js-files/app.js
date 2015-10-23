@@ -1,33 +1,190 @@
-// Import Catdown
-var Catdown = require('catdown');
+var remote = require('remote');
+var Menu = remote.require('menu');
+var dialog = remote.require('dialog');
 var fs = require('fs');
+var _ = require('lodash');
 
-var currentFile = './EXAMPLE.md';
-
-var editor = document.getElementById('editor');
-var preview = document.getElementById('preview');
+var currentPath = '';
+var currentFile = '';
 
 // Create an editor
-var catdown = new Catdown({
-  textarea: editor,
-  preview: preview,
+var CatdownEditor = require('./js/catdown')({
+  editor: 'editor',
+  preview: 'preview'
 });
 
-catdown.setKeys({
-  'Ctrl-I': function () {
-    this._surroundSelection('*');
+var openFile = function (filename) {
+  currentPath = filename.substring(0, filename.lastIndexOf('/'));
+  currentFile = filename.substring(filename.lastIndexOf('/') + 1, filename.length - 3);
+
+  fs.readFile(filename, 'utf8', function (error, data) {
+    CatdownEditor.set(data);
+  });
+};
+
+var saveFile = function (filename) {
+  fs.writeFile(filename, CatdownEditor.get(), function (error) {
+    // ToDo: handle error
+  });
+};
+
+var openFiles = function (filenames) {
+  _.forEach(filenames, openFile);
+};
+
+
+var template = [
+  {
+    label: 'Electron',
+    submenu: [
+      {
+        label: 'About Electron',
+        selector: 'orderFrontStandardAboutPanel:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Services',
+        submenu: []
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Hide Electron',
+        accelerator: 'CmdOrCtrl+H',
+        selector: 'hide:'
+      },
+      {
+        label: 'Hide Others',
+        accelerator: 'CmdOrCtrl+Shift+H',
+        selector: 'hideOtherApplications:'
+      },
+      {
+        label: 'Show All',
+        selector: 'unhideAllApplications:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Quit',
+        accelerator: 'CmdOrCtrl+Q',
+        selector: 'terminate:'
+      },
+    ]
   },
-  'Ctrl-B': function () {
-    this._surroundSelection('**');
+  {
+    label: 'File',
+    submenu: [
+      {
+        label: 'Open...',
+        accelerator: 'CmdOrCtrl+O',
+        click: function () {
+          dialog.showOpenDialog({
+            filters: [
+              { name: 'Markdown', extensions: ['md', 'markdown'] }
+            ]
+          }, openFiles);
+        }
+      },
+      {
+        label: 'Save As...',
+        accelerator: 'CmdOrCtrl+S',
+        click: function () {
+          dialog.showSaveDialog({
+            title: (currentFile)? currentFile: '',
+            defaultPath: (currentPath)? currentPath: '',
+            filters: [
+              { name: 'Markdown', extensions: ['md', 'markdown'] }
+            ]
+          }, saveFile);
+        }
+      }
+    ]
   },
-  'Ctrl-S': function () {
-    fs.writeFile(currentFile, this.value(), function (error) {
-      // ToDo: handle error
-    });
+  {
+    label: 'Edit',
+    submenu: [
+      {
+        label: 'Undo',
+        accelerator: 'CmdOrCtrl+Z',
+        selector: 'undo:'
+      },
+      {
+        label: 'Redo',
+        accelerator: 'Shift+CmdOrCtrl+Z',
+        selector: 'redo:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Cut',
+        accelerator: 'CmdOrCtrl+X',
+        selector: 'cut:'
+      },
+      {
+        label: 'Copy',
+        accelerator: 'CmdOrCtrl+C',
+        selector: 'copy:'
+      },
+      {
+        label: 'Paste',
+        accelerator: 'CmdOrCtrl+V',
+        selector: 'paste:'
+      },
+      {
+        label: 'Select All',
+        accelerator: 'CmdOrCtrl+A',
+        selector: 'selectAll:'
+      }
+    ]
+  },
+  {
+    label: 'View',
+    submenu: [
+      {
+        label: 'Reload',
+        accelerator: 'CmdOrCtrl+R',
+        click: function() { remote.getCurrentWindow().reload(); }
+      },
+      {
+        label: 'Toggle DevTools',
+        accelerator: 'Alt+CmdOrCtrl+I',
+        click: function() { remote.getCurrentWindow().toggleDevTools(); }
+      },
+    ]
+  },
+  {
+    label: 'Window',
+    submenu: [
+      {
+        label: 'Minimize',
+        accelerator: 'CmdOrCtrl+M',
+        selector: 'performMiniaturize:'
+      },
+      {
+        label: 'Close',
+        accelerator: 'CmdOrCtrl+W',
+        selector: 'performClose:'
+      },
+      {
+        type: 'separator'
+      },
+      {
+        label: 'Bring All to Front',
+        selector: 'arrangeInFront:'
+      }
+    ]
+  },
+  {
+    label: 'Help',
+    submenu: []
   }
-});
+];
 
-fs.readFile(currentFile, 'utf8', function (error, data) {
-  // Update data
-  catdown.set(data);
-});
+menu = Menu.buildFromTemplate(template);
+
+Menu.setApplicationMenu(menu);

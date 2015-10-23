@@ -4,13 +4,17 @@ var dialog = remote.require('dialog');
 var fs = require('fs');
 var _ = require('lodash');
 
+
 var currentPath = '';
 var currentFile = '';
 
 // Create an editor
 var CatdownEditor = require('./js/catdown')({
   editor: 'editor',
-  preview: 'preview'
+  preview: 'preview',
+  plugins: [
+    require("catdown-scrollsync") //This doesn't work !!! :-(
+  ]
 });
 
 var openFile = function (filename) {

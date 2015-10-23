@@ -11,7 +11,8 @@ var CatdownEditor = {
 
     this.catdown = new Catdown({
       textarea: document.getElementById(data.editor),
-      preview: document.getElementById(data.preview)
+      preview: document.getElementById(data.preview),
+      plugins: data.plugins || null
     });
 
     if(data.content)

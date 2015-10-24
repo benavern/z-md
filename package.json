@@ -1,6 +1,6 @@
 {
   "name": "z-md",
-  "version": "1.0.0",
+  "version": "0.1.0",
   "description": "yet an other md editor",
   "main": "main.js",
   "scripts": {

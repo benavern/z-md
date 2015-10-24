@@ -4,8 +4,8 @@ var dialog = remote.require('dialog');
 var fs = require('fs');
 var _ = require('lodash');
 
-var currentPath = '';
-var currentFile = '';
+var currentPath = '.';
+var currentFile = 'EXAMPLE.md';
 
 // Create an editor
 var CatdownEditor = require('./js/catdown')({
@@ -31,6 +31,8 @@ var saveFile = function (filename) {
 var openFiles = function (filenames) {
   _.forEach(filenames, openFile);
 };
+
+openFile(currentPath + '/' + currentFile);
 
 
 var template = [

@@ -11,7 +11,10 @@ var currentFile = 'EXAMPLE.md';
 // Create an editor
 var CatdownEditor = require('./js/catdown')({
   editor: 'editor',
-  preview: 'preview'
+  preview: 'preview',
+  plugins: [
+    require("catdown-scrollsync") //This doesn't work !!! :-(
+  ]
 });
 
 var openFile = function (filename) {

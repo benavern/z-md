@@ -1,5 +1,6 @@
 var remote = require('remote');
 var Menu = remote.require('menu');
+var app = remote.require('app');
 var dialog = remote.require('dialog');
 var fs = require('fs');
 var _ = require('lodash');
@@ -15,9 +16,11 @@ var CatdownEditor = require('./js/catdown')({
 
 var openFile = function (filename) {
   currentPath = filename.substring(0, filename.lastIndexOf('/'));
-  currentFile = filename.substring(filename.lastIndexOf('/') + 1, filename.length - 3);
+  currentFile = filename.substring(filename.lastIndexOf('/') + 1, filename.length);
 
   fs.readFile(filename, 'utf8', function (error, data) {
+    remote.getCurrentWindow().setTitle(currentFile + ' - ' + app.getName());
+
     CatdownEditor.set(data);
   });
 };

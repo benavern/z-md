@@ -11,9 +11,10 @@ var CatdownEditor = {
 
     this.catdown = new Catdown({
       textarea: document.getElementById(data.editor),
-      preview: document.getElementById(data.preview),
-      plugins: data.plugins || null
+      preview: document.getElementById(data.preview)
     });
+
+    this.catdown.use(require('catdown-scrollsync'));
 
     if(data.content)
       this.set(data.content);

@@ -5,24 +5,30 @@ var dialog = remote.require('dialog');
 var fs = require('fs');
 var _ = require('lodash');
 
+var sidebar = document.getElementById('sidebar');
+
 var currentPath = '.';
+var currentFolder = 'z-md';
 var currentFile = 'EXAMPLE.md';
 
 // Create an editor
 var CatdownEditor = require('./js/catdown')({
   editor: 'editor',
-  preview: 'preview',
-  plugins: [
-    require("catdown-scrollsync") //This doesn't work !!! :-(
-  ]
+  preview: 'preview'
 });
 
 var openFile = function (filename) {
   currentPath = filename.substring(0, filename.lastIndexOf('/'));
+  currentFolder = currentPath.substring(currentPath.lastIndexOf('/') + 1, currentPath.length);
   currentFile = filename.substring(filename.lastIndexOf('/') + 1, filename.length);
 
   fs.readFile(filename, 'utf8', function (error, data) {
     remote.getCurrentWindow().setTitle(currentFile + ' - ' + app.getName());
+    sidebar.innerHTML = '<ul><li>' +
+                        currentFolder +
+                        '<ul><li>' +
+                        currentFile +
+                        '</li></ul></li></ul>';
 
     CatdownEditor.set(data);
   });

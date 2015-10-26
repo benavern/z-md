@@ -4,6 +4,7 @@ var app = remote.require('app');
 var dialog = remote.require('dialog');
 var fs = require('fs');
 var _ = require('lodash');
+var dirTree = require('directory-tree');
 
 var sidebar = document.getElementById('sidebar');
 
@@ -47,48 +48,70 @@ var openFiles = function (filenames) {
 openFile(currentPath + '/' + currentFile);
 
 
+var openFolder = function (folderpath){
+  var tree = dirTree.directoryTree('./TESTS');
+
+  var sidebarContent = "";
+
+  function objToUl(data) {
+    sidebarContent += "<ul>";
+    for(i=0; i<data.length; i++){
+      sidebarContent += "<li>" + data[i].name + "</li>";
+      if(!!data[i].children){
+        objToUl(data[i].children)
+      }
+    }
+    sidebarContent += "</ul>";
+  }
+
+  objToUl([tree])
+
+  sidebar.innerHTML = sidebarContent;
+
+}
+
 var template = [
-  {
-    label: 'Electron',
-    submenu: [
-      {
-        label: 'About Electron',
-        selector: 'orderFrontStandardAboutPanel:'
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Services',
-        submenu: []
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Hide Electron',
-        accelerator: 'CmdOrCtrl+H',
-        selector: 'hide:'
-      },
-      {
-        label: 'Hide Others',
-        accelerator: 'CmdOrCtrl+Shift+H',
-        selector: 'hideOtherApplications:'
-      },
-      {
-        label: 'Show All',
-        selector: 'unhideAllApplications:'
-      },
-      {
-        type: 'separator'
-      },
-      {
-        label: 'Quit',
-        accelerator: 'CmdOrCtrl+Q',
-        selector: 'terminate:'
-      },
-    ]
-  },
+  // {
+  //   label: 'Electron',
+  //   submenu: [
+  //     {
+  //       label: 'About Electron',
+  //       selector: 'orderFrontStandardAboutPanel:'
+  //     },
+  //     {
+  //       type: 'separator'
+  //     },
+  //     {
+  //       label: 'Services',
+  //       submenu: []
+  //     },
+  //     {
+  //       type: 'separator'
+  //     },
+  //     {
+  //       label: 'Hide Electron',
+  //       accelerator: 'CmdOrCtrl+H',
+  //       selector: 'hide:'
+  //     },
+  //     {
+  //       label: 'Hide Others',
+  //       accelerator: 'CmdOrCtrl+Shift+H',
+  //       selector: 'hideOtherApplications:'
+  //     },
+  //     {
+  //       label: 'Show All',
+  //       selector: 'unhideAllApplications:'
+  //     },
+  //     {
+  //       type: 'separator'
+  //     },
+  //     {
+  //       label: 'Quit',
+  //       accelerator: 'CmdOrCtrl+Q',
+  //       selector: 'terminate:'
+  //     },
+  //   ]
+  // },
   {
     label: 'File',
     submenu: [
@@ -97,10 +120,20 @@ var template = [
         accelerator: 'CmdOrCtrl+O',
         click: function () {
           dialog.showOpenDialog({
+            properties: [ 'openFile' ],
             filters: [
               { name: 'Markdown', extensions: ['md', 'markdown'] }
             ]
           }, openFiles);
+        }
+      },
+      {
+        label: 'Open folder...',
+        accelerator: 'Alt+CmdOrCtrl+O',
+        click: function () {
+          dialog.showOpenDialog({
+            properties: [ 'openDirectory' ]
+          }, openFolder);
         }
       },
       {
@@ -115,7 +148,12 @@ var template = [
             ]
           }, saveFile);
         }
-      }
+      },
+      {
+        label: 'Quit',
+        accelerator: 'CmdOrCtrl+Q',
+        selector: 'terminate:'
+      },
     ]
   },
   {
@@ -157,19 +195,19 @@ var template = [
     ]
   },
   {
-    label: 'View',
-    submenu: [
-      {
-        label: 'Reload',
-        accelerator: 'CmdOrCtrl+R',
-        click: function() { remote.getCurrentWindow().reload(); }
-      },
-      {
-        label: 'Toggle DevTools',
-        accelerator: 'Alt+CmdOrCtrl+I',
-        click: function() { remote.getCurrentWindow().toggleDevTools(); }
-      },
-    ]
+   label: 'View',
+   submenu: [
+     {
+       label: 'Reload',
+       accelerator: 'CmdOrCtrl+R',
+       click: function() { remote.getCurrentWindow().reload(); }
+     },
+     {
+       label: 'Toggle DevTools',
+       accelerator: 'Alt+CmdOrCtrl+I',
+       click: function() { remote.getCurrentWindow().toggleDevTools(); }
+     },
+   ]
   },
   {
     label: 'Window',
